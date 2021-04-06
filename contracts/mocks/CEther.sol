@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.6.12;
 
-import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "../TransferETHHelper.sol";
 
 
-contract CEther is OwnableUpgradeSafe, ERC20UpgradeSafe {
+contract CEther is Ownable, ERC20 {
     using SafeMath for uint256;
 
     //uint256 internal exchangeRate;
@@ -14,15 +14,23 @@ contract CEther is OwnableUpgradeSafe, ERC20UpgradeSafe {
     //uint256 public supplyRate;
     uint256 public redeemPercentage;
 
+    constructor() ERC20("cETH", "cETH") public {
+        //_setupDecimals(8);
+        exchangeRateStoredVal = 27061567570282877;   // 270615675702828777787378059
+        //supplyRate = 975104455;
+        super._mint(msg.sender, uint(1000).mul(10 ** 18));
+    }
+
+/*
     function initialize() public initializer {
         OwnableUpgradeSafe.__Ownable_init();
         ERC20UpgradeSafe.__ERC20_init_unchained("cETH", "cETH");
         //_setupDecimals(8);
-        exchangeRateStoredVal = 22595347673700721; 
+        exchangeRateStoredVal = 27061567570282877;   // 270615675702828777787378059
         //supplyRate = 975104455;
-        super._mint(msg.sender, uint(1000).mul(10 ** 8));
+        super._mint(msg.sender, uint(1000).mul(10 ** 18));
     }
-
+*/
     function mint() external payable returns (uint256) {
         //_mint(msg.sender, msg.value.mul(uint(1e18)).div(exchangeRateStoredVal));
         mintFresh(msg.sender, msg.value);
@@ -46,9 +54,8 @@ contract CEther is OwnableUpgradeSafe, ERC20UpgradeSafe {
 */
     function redeem(uint redeemAmount) external returns (uint) {
         uint256 amount = redeemAmount.mul(exchangeRateStoredVal).div(uint(1e18));
-
-        TransferETHHelper.safeTransferETH(msg.sender, amount);
-
+        msg.sender.transfer(amount);
+        //TransferETHHelper.safeTransferETH(msg.sender, amount);
         return amount;
     }
 
@@ -86,6 +93,7 @@ contract CEther is OwnableUpgradeSafe, ERC20UpgradeSafe {
     function doTransferOut(address payable to, uint amount) internal {
         /* Send the Ether, with minimal gas and revert on failure */
         to.transfer(amount);
+        //TransferETHHelper.safeTransferETH(to, amount);
     }
 
     /**

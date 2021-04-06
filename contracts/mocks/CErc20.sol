@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.6.12;
 
-import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 //import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/SafeERC20.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract CErc20 is OwnableUpgradeSafe, ERC20UpgradeSafe {
+contract CErc20 is Ownable, ERC20 {
     using SafeMath for uint256;
 
     //uint256 internal exchangeRate;
@@ -16,15 +16,22 @@ contract CErc20 is OwnableUpgradeSafe, ERC20UpgradeSafe {
     address public allowedToken;
     IERC20 public token;
 
+    constructor() ERC20("cToken", "cToken") public {
+        //_setupDecimals(8);
+        exchangeRateStoredVal = 21061567570282878;
+        //supplyRate = 30368789660;
+        super._mint(msg.sender, uint(1000).mul(10 ** 18));
+    }
+/* 
     function initialize() public initializer {
         OwnableUpgradeSafe.__Ownable_init();
         ERC20UpgradeSafe.__ERC20_init_unchained("cToken", "cToken");
         //_setupDecimals(8);
-        exchangeRateStoredVal = 21116902930684312;
+        exchangeRateStoredVal = 21061567570282878;
         //supplyRate = 30368789660;
-        super._mint(msg.sender, uint(1000).mul(10 ** 8));
+        super._mint(msg.sender, uint(1000).mul(10 ** 18));
     }
-
+*/
     function mint(uint256 amount) external returns (uint256){
         token.transferFrom(msg.sender, address(this), amount);
         mintFresh(msg.sender, amount);

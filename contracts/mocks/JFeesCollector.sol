@@ -6,22 +6,25 @@
  */
 pragma solidity 0.6.12;
 
-import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "../TransferETHHelper.sol";
 import "./JFeesCollectorStorage.sol";
 import "./IJFeesCollector.sol";
 
-contract JFeesCollector is OwnableUpgradeSafe, JFeesCollectorStorage, IJFeesCollector {
+contract JFeesCollector is Ownable, JFeesCollectorStorage, IJFeesCollector {
     using SafeMath for uint256;
 
+    constructor() public {
+        contractVersion = 1;
+    }
+/*
     function initialize() public initializer {
         OwnableUpgradeSafe.__Ownable_init();
         contractVersion = 1;
     }
-
+*/
     modifier locked() {
         require(!fLock);
         fLock = true;

@@ -7,23 +7,27 @@
 pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./IJPriceOracleTest.sol";
 import "./JPriceOracleStorage.sol";
 
-contract JPriceOracle is OwnableUpgradeSafe, JPriceOracleStorage, IJPriceOracleTest { 
+contract JPriceOracle is Ownable, JPriceOracleStorage, IJPriceOracleTest { 
     using SafeMath for uint256;
 
     /**
     * @dev contract initializer
     */
+    constructor() public {
+        _addAdmin(msg.sender);
+        contractVersion = 1;
+    }
+/*
     function initialize() external initializer() {
         OwnableUpgradeSafe.__Ownable_init();
         _addAdmin(msg.sender);
         contractVersion = 1;
     }
-
+*/
     /**
     * @dev admins modifiers
     */

@@ -49,7 +49,7 @@ describe('JProtocol', function () {
   sendDAItoUsers(tokenOwner, user1, user2, user3, user4, user5, user6);
 
   it('send some DAI to CErc20', async function () {
-    tx = await this.DAI.transfer(this.CErc20.address, web3.utils.toWei('10', 'ether'), {
+    tx = await this.DAI.transfer(this.CErc20.address, web3.utils.toWei('1000', 'ether'), {
       from: tokenOwner
     });
     console.log("Gas to transfer DAI to JCompound: " + tx.receipt.gasUsed);
@@ -57,7 +57,7 @@ describe('JProtocol', function () {
     // console.log("transfer token costs: " + web3.utils.fromWei(totcost.toString(), 'ether') + " ETH");
     protBal = await this.DAI.balanceOf(this.CErc20.address);
     console.log(`protocol DAI Balance: ${web3.utils.fromWei(protBal, "ether")} DAI`)
-    expect(web3.utils.fromWei(protBal, "ether")).to.be.equal(new BN(10).toString());
+    expect(web3.utils.fromWei(protBal, "ether")).to.be.equal(new BN(1000).toString());
   });
 
   it("user1 buys some token EthTrA", async function () {

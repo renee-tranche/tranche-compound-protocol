@@ -6,8 +6,10 @@
  */
 pragma solidity ^0.6.12;
 
-import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/SafeERC20.sol";
+//import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
+//import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "./TransferETHHelper.sol";
 import "./IJPriceOracle.sol";
 import "./IJTrancheTokens.sol";
@@ -17,19 +19,35 @@ import "./IJCompound.sol";
 import "./ICErc20.sol";
 
 
-contract JCompound is OwnableUpgradeSafe, JCompoundStorage, IJCompound {
+contract JCompound is Ownable, JCompoundStorage, IJCompound {
     using SafeMath for uint256;
-
+/*
     /**
      * @dev contract initializer
      * @param _priceOracle price oracle address
      * @param _feesCollector fees collector contract address
      * @param _tranchesDepl tranches deployer contract address
      */
-    function initialize(address _priceOracle, 
+    /*function initialize(address _priceOracle, 
             address _feesCollector, 
             address _tranchesDepl) public initializer() {
         OwnableUpgradeSafe.__Ownable_init();
+        priceOracleAddress = _priceOracle;
+        feesCollectorAddress = _feesCollector;
+        tranchesDeployerAddress = _tranchesDepl;
+        redeemTimeout = 3; //default
+        totalBlocksPerYear = 2392387;
+    }*/
+
+    /**
+     * @dev constructor
+     * @param _priceOracle price oracle address
+     * @param _feesCollector fees collector contract address
+     * @param _tranchesDepl tranches deployer contract address
+     */
+    constructor(address _priceOracle, 
+            address _feesCollector, 
+            address _tranchesDepl) public {
         priceOracleAddress = _priceOracle;
         feesCollectorAddress = _feesCollector;
         tranchesDeployerAddress = _tranchesDepl;
@@ -184,7 +202,7 @@ contract JCompound is OwnableUpgradeSafe, JCompoundStorage, IJCompound {
         trancheAddresses[tranchePairsCounter].ATrancheAddress = 
                 IJTranchesDeployer(tranchesDeployerAddress).deployNewTrancheATokens(_nameA, _symbolA, msg.sender);
         trancheAddresses[tranchePairsCounter].BTrancheAddress = 
-                IJTranchesDeployer(tranchesDeployerAddress).deployNewTrancheBTokens(_nameB, _symbolB, msg.sender); //, _initBSupply);
+                IJTranchesDeployer(tranchesDeployerAddress).deployNewTrancheBTokens(_nameB, _symbolB, msg.sender); 
         
 
         trancheParameters[tranchePairsCounter].cTokenDecimals = _cTokenDec;
@@ -353,13 +371,23 @@ contract JCompound is OwnableUpgradeSafe, JCompoundStorage, IJCompound {
     }
 
     /**
-     * @dev get Tranche A value
+     * @dev get Tranche A value in underlying token
      * @param _trancheNum tranche number
      * @return tranche A value
      */
     function getTrAValue(uint256 _trancheNum) public view returns (uint256) {
         uint256 totASupply = IERC20(trancheAddresses[_trancheNum].ATrancheAddress).totalSupply();
         return totASupply.mul(getTrancheAExchangeRate(_trancheNum)).div(10 ** uint256(trancheParameters[_trancheNum].underlyingDecimals));
+    }
+
+    /**
+     * @dev get Tranche A value in cToken
+     * @param _trancheNum tranche number
+     * @return tranche A value in cToken
+     */
+    function getCTokenTrAValue(uint256 _trancheNum) public view returns (uint256) {
+        uint256 totAValue = getTrAValue(_trancheNum);
+        return totAValue.mul(10 ** uint256(trancheParameters[_trancheNum].underlyingDecimals)).div(getCompoundPrice(_trancheNum));
     }
 
     /**
@@ -377,7 +405,7 @@ contract JCompound is OwnableUpgradeSafe, JCompoundStorage, IJCompound {
     }
 
     /**
-     * @dev get Tranche total value
+     * @dev get Tranche total value in underlying tokens
      * @param _trancheNum tranche number
      * @return tranche total value
      */
@@ -485,7 +513,7 @@ contract JCompound is OwnableUpgradeSafe, JCompoundStorage, IJCompound {
                 // transfer fees to JFeesCollector
                 feesAmount = diffBal.sub(userAmount);
                 TransferETHHelper.safeTransferETH(feesCollectorAddress, feesAmount);
-            }   
+            }  
         } else {
             // calculate taToken amount via cToken price
             oldBal = getTokenBalance(trancheAddresses[_trancheNum].buyerCoinAddress);
@@ -578,7 +606,7 @@ contract JCompound is OwnableUpgradeSafe, JCompoundStorage, IJCompound {
             // calculate taToken amount via cToken price
             oldBal = getTokenBalance(trancheAddresses[_trancheNum].buyerCoinAddress);
             require(redeemCErc20Tokens(trancheAddresses[_trancheNum].buyerCoinAddress, tbAmount, false) == 0, "JCompound: incorrect answer from cToken");
-            diffBal = getTokenBalance(trancheAddresses[_trancheNum].buyerCoinAddress);
+            diffBal = getTokenBalance(trancheAddresses[_trancheNum].buyerCoinAddress).sub(oldBal);
             userAmount = diffBal.mul(trancheParameters[_trancheNum].redemptionPercentage).div(PERCENT_DIVIDER);
             SafeERC20.safeTransfer(IERC20(trancheAddresses[_trancheNum].buyerCoinAddress), msg.sender, userAmount);
             if (diffBal != userAmount) {
