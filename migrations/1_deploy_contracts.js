@@ -146,6 +146,12 @@ module.exports = async (deployer, network, accounts) => {
       console.log('compound deployer 4');
       await JCompoundInstance.addTrancheToProtocol(TRANCHE_TWO_TOKEN_ADDRESS, "Tranche A - Compound USDT", "ACUSDT", "Tranche B - Compound USDT", "BCUSDT", web3.utils.toWei("0.02", "ether"), 8, 6, { from: factoryOwner });
 
+      console.log('compound deployer wbtc');
+      await JCompoundInstance.addTrancheToProtocol(TRANCHE_TWO_TOKEN_ADDRESS, "Tranche A - Compound WBTC", "ACWBTC", "Tranche B - Compound WBTC", "BCWBTC", web3.utils.toWei("0.02", "ether"), 8, 8, { from: factoryOwner });
+
+      console.log('compound deployer link');
+      await JCompoundInstance.addTrancheToProtocol(TRANCHE_TWO_TOKEN_ADDRESS, "Tranche A - Compound LINK", "ACLINK", "Tranche B - Compound LINK", "BCLINK", web3.utils.toWei("0.02", "ether"), 8, 18, { from: factoryOwner });
+
       console.log(`JCompound deployed at: ${JCompoundInstance.address}`);
     } catch (error) {
       console.log(error);
