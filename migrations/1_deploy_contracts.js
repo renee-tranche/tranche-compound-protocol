@@ -120,7 +120,8 @@ module.exports = async (deployer, network, accounts) => {
     }
   } else if (network == "mainnet") {
     let { FEE_COLLECTOR_ADDRESS, PRICE_ORACLE_ADDRESS,
-      TRANCHE_ONE_TOKEN_ADDRESS, TRANCHE_ONE_CTOKEN_ADDRESS, TRANCHE_TWO_TOKEN_ADDRESS, TRANCHE_TWO_CTOKEN_ADDRESS, COMP_ADDRESS, COMP_CONTROLLER
+      TRANCHE_ONE_TOKEN_ADDRESS, TRANCHE_ONE_CTOKEN_ADDRESS, TRANCHE_TWO_TOKEN_ADDRESS, TRANCHE_TWO_CTOKEN_ADDRESS, COMP_ADDRESS, COMP_CONTROLLER,
+      TRANCHE_THREE_TOKEN_ADDRESS, TRANCHE_FOUR_TOKEN_ADDRESS, TRANCHE_FOUR_CTOKEN_ADDRESS, TRANCHE_THREE_CTOKEN_ADDRESS
     } = process.env;
     const accounts = await web3.eth.getAccounts();
     const factoryOwner = accounts[0];
@@ -147,11 +148,13 @@ module.exports = async (deployer, network, accounts) => {
       await JCompoundInstance.addTrancheToProtocol(TRANCHE_TWO_TOKEN_ADDRESS, "Tranche A - Compound USDT", "ACUSDT", "Tranche B - Compound USDT", "BCUSDT", web3.utils.toWei("0.02", "ether"), 8, 6, { from: factoryOwner });
 
       console.log('compound deployer wbtc');
-      await JCompoundInstance.addTrancheToProtocol(TRANCHE_TWO_TOKEN_ADDRESS, "Tranche A - Compound WBTC", "ACWBTC", "Tranche B - Compound WBTC", "BCWBTC", web3.utils.toWei("0.02", "ether"), 8, 8, { from: factoryOwner });
-
+      await JCompoundInstance.addTrancheToProtocol(TRANCHE_THREE_TOKEN_ADDRESS, "Tranche A - Compound WBTC", "ACWBTC", "Tranche B - Compound WBTC", "BCWBTC", web3.utils.toWei("0.02", "ether"), 8, 8, { from: factoryOwner });
+      console.log('set ctoken wbtc');
+      await JCompoundInstance.setCTokenContract(TRANCHE_THREE_TOKEN_ADDRESS, TRANCHE_THREE_CTOKEN_ADDRESS, { from: factoryOwner });
       console.log('compound deployer link');
-      await JCompoundInstance.addTrancheToProtocol(TRANCHE_TWO_TOKEN_ADDRESS, "Tranche A - Compound LINK", "ACLINK", "Tranche B - Compound LINK", "BCLINK", web3.utils.toWei("0.02", "ether"), 8, 18, { from: factoryOwner });
-
+      await JCompoundInstance.addTrancheToProtocol(TRANCHE_FOUR_TOKEN_ADDRESS, "Tranche A - Compound LINK", "ACLINK", "Tranche B - Compound LINK", "BCLINK", web3.utils.toWei("0.02", "ether"), 8, 18, { from: factoryOwner });
+      console.log('set ctoken link');
+      await JCompoundInstance.setCTokenContract(TRANCHE_FOUR_TOKEN_ADDRESS, TRANCHE_FOUR_CTOKEN_ADDRESS, { from: factoryOwner });
       console.log(`JCompound deployed at: ${JCompoundInstance.address}`);
     } catch (error) {
       console.log(error);
